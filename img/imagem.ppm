@@ -1,0 +1,15 @@
+# aqui o P3 indica que cada pixel da imagem contém 3
+# indicadores de cor. Para imagens em preto e branco,
+# o indicador seria P2
+P3
+# Example 5 x 4 image
+# a próxima linha indica que a imagem é representada por 
+# uma matriz 5x4
+5 4
+# indicamos que o valor máximo para cada valor é 255
+255
+# aqui, cada tripla corresponde a um pixel
+255 0 0   0 0 0    0 0 0    0 0 0    0 255 0
+0 0 0     0 0 0    0 0 0    0 0 0    0 0 0
+0 0 0     0 0 0    0 0 0    0 0 0    0 0 0
+0 0 255   0 0 0    0 0 0    0 0 0    255 255 255
