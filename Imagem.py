@@ -61,22 +61,76 @@ class Imagem:
         Quando o parâmetro normalizar está definido como True, o histograma
         é dado por p(rk) = nk/n para k [0, L-1], em que L é o valor máximo
         dos pixels. A função p(r) nos dá a probabilidade de ocorrência de
-        dado nível de cinza rk.
+        dado nível de cinza rk. Assim, o formato do histograma não muda,
+        mas os valores vão ficar entre 0 e 1.
 
         :param normalizar:
         :return:
         """
+        import matplotlib.pyplot as plt
+
         histograma = []
+        niveis = []
+        nks = []
         pixels = self.pixels
         niveis_cinza = set(pixels)
 
-        if normalizar:
-            for nivel in niveis_cinza:
-                nk = pixels.count(nivel) / len(niveis_cinza)
-                histograma.append([nivel, nk])
-        else:
-            for nivel in niveis_cinza:
+        for nivel in niveis_cinza:
+            if normalizar:
+                # nk = pixels.count(nivel) / len(niveis_cinza)
+                nk = pixels.count(nivel) / len(pixels)
+            else:
                 nk = pixels.count(nivel)
-                histograma.append([nivel, nk])
+            niveis.append(nivel)
+            nks.append(nk)
+            histograma.append([nivel, nk])
 
         self.histograma = histograma
+
+        fig, ax = plt.subplots(figsize=(23, 8))
+        ax.bar(niveis, nks)
+        ax.set_title('Histograma da imagem fatiada')
+        ax.set_xlabel('Níveis de cores')
+        ax.set_ylabel('nk')
+
+        if normalizar:
+            fig.savefig('img/histograma_norm.png')
+        else:
+            fig.savefig('img/histograma.png')
+
+    def equalizar(self):
+        """
+        Esse é doideira pra explicar
+
+        :return:
+        """
+        import matplotlib.pyplot as plt
+
+        novo_histograma = self.histograma
+        hist_normalizado = []
+        niveis = []
+        pixels_img = self.pixels
+        niveis_cinza = set(pixels_img)
+        soma = 0
+
+        # o histograma normalizado me diz a probabilidade de cada nível de cinza aparecer em um pixel
+        for nivel in niveis_cinza:
+            nk = pixels_img.count(nivel) / len(pixels_img)
+            niveis.append(nivel)
+            hist_normalizado.append(nk)
+
+        # esse histograma é a soma cumulativa das probabilidades
+        for i in range(0, len(hist_normalizado)):
+            soma += hist_normalizado[i]
+            novo_histograma[i] = soma
+
+        for i in range(0, len(novo_histograma)):
+            novo_histograma[i] = round(novo_histograma[i] * self.maximo - 1)
+
+        fig, ax = plt.subplots(figsize=(23, 8))
+        ax.bar(niveis, novo_histograma)
+        ax.set_title('Histograma equalizado da imagem original')
+        ax.set_xlabel('Níveis de cores')
+        ax.set_ylabel('Valor normalizado')
+
+        fig.savefig('img/histograma_equalizado.png')
