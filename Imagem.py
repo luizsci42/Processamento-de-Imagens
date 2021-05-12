@@ -52,7 +52,7 @@ class Imagem:
             self.maximo
             ))
 
-    def gerar_histograma(self, normalizar: bool = False):
+    def gerar_histograma(self, normalizar: bool = False, salvar: bool = False):
         """
         O histograma de uma imagem é definido como uma função discreta
         h(rk) = nk, em que rk é o k-ésimo nível de cinza e nk é o número
@@ -65,72 +65,98 @@ class Imagem:
         mas os valores vão ficar entre 0 e 1.
 
         :param normalizar:
-        :return:
+        :param salvar:
+        :return: void
         """
-        import matplotlib.pyplot as plt
-
         histograma = []
-        niveis = []
         nks = []
         pixels = self.pixels
-        niveis_cinza = set(pixels)
+        niveis_cinza = list(set(pixels))
 
         for nivel in niveis_cinza:
             if normalizar:
-                # nk = pixels.count(nivel) / len(niveis_cinza)
                 nk = pixels.count(nivel) / len(pixels)
             else:
                 nk = pixels.count(nivel)
-            niveis.append(nivel)
             nks.append(nk)
             histograma.append([nivel, nk])
 
         self.histograma = histograma
 
-        fig, ax = plt.subplots(figsize=(23, 8))
-        ax.bar(niveis, nks)
-        ax.set_title('Histograma da imagem fatiada')
-        ax.set_xlabel('Níveis de cores')
-        ax.set_ylabel('nk')
+        if salvar:
+            import matplotlib.pyplot as plt
 
-        if normalizar:
-            fig.savefig('img/histograma_norm.png')
-        else:
-            fig.savefig('img/histograma.png')
+            fig, ax = plt.subplots(figsize=(23, 8))
+            ax.bar(niveis_cinza, nks)
+            ax.set_title('Histograma da imagem')
+            ax.set_xlabel('Níveis de cores')
+            ax.set_ylabel('nk')
 
-    def equalizar(self):
+            if normalizar:
+                fig.savefig('img/histograma_norm.png')
+            else:
+                fig.savefig('img/histograma.png')
+
+    def equalizar(self, salvar: bool = False, verboso: bool = False):
         """
         Esse é doideira pra explicar
 
         :return:
         """
-        import matplotlib.pyplot as plt
-
-        novo_histograma = self.histograma
-        hist_normalizado = []
-        niveis = []
+        novo_histograma = []
         pixels_img = self.pixels
-        niveis_cinza = set(pixels_img)
+        niveis_cinza = list(set(pixels_img))
         soma = 0
 
-        # o histograma normalizado me diz a probabilidade de cada nível de cinza aparecer em um pixel
-        for nivel in niveis_cinza:
-            nk = pixels_img.count(nivel) / len(pixels_img)
-            niveis.append(nivel)
-            hist_normalizado.append(nk)
+        if verboso:
+            print('Numero de níveis de cinza: {}'.format(len(niveis_cinza)))
+            hist_norm = []
+            hist_cum = []
 
-        # esse histograma é a soma cumulativa das probabilidades
-        for i in range(0, len(hist_normalizado)):
-            soma += hist_normalizado[i]
-            novo_histograma[i] = soma
+            # o histograma normalizado me diz a probabilidade de cada nível de cinza aparecer em um pixel
+            for nivel in niveis_cinza:
+                # a normalização diz a probabilidade de cada nível de cinza aparecer em um pixel arbitrário
+                nk = pixels_img.count(nivel) / len(pixels_img)
+                hist_norm.append(nk)
 
-        for i in range(0, len(novo_histograma)):
-            novo_histograma[i] = round(novo_histograma[i] * self.maximo - 1)
+            print('Histograma normalizado:\n{}'.format(hist_norm))
 
-        fig, ax = plt.subplots(figsize=(23, 8))
-        ax.bar(niveis, novo_histograma)
-        ax.set_title('Histograma equalizado da imagem original')
-        ax.set_xlabel('Níveis de cores')
-        ax.set_ylabel('Valor normalizado')
+            for i in range(0, len(hist_norm)):
+                # fazemos a soma cumulativa dessas probabilidades
+                soma += hist_norm[i]
+                hist_cum.append(soma)
 
-        fig.savefig('img/histograma_equalizado.png')
+            print('Histograma cumulativo:\n{}'.format(hist_cum))
+
+            for i in range(0, len(hist_cum)):
+                # retiramos os valores de sua representação probabilistica
+                valor_final = round(hist_cum[i] * self.maximo)
+                novo_histograma.append(valor_final)
+
+            print('Histograma final:\n{}'.format(novo_histograma, len(novo_histograma)))
+
+        # se a opção verbosa estiver desabilitada
+        else:
+            # o histograma normalizado me diz a probabilidade de cada nível de cinza aparecer em um pixel
+            for nivel in niveis_cinza:
+                # a normalização diz a probabilidade de cada nível de cinza aparecer em um pixel arbitrário
+                nk = pixels_img.count(nivel) / len(pixels_img)
+                # fazemos a soma cumulativa dessas probabilidades
+                soma += nk
+                # retiramos os valores de sua representação probabilistica
+                valor_final = round(soma * self.maximo)
+                novo_histograma.append(valor_final)
+
+        print('Fim da operação, alterando pixels da imagem')
+        self.pixels = novo_histograma
+
+        if salvar:
+            import matplotlib.pyplot as plt
+
+            fig, ax = plt.subplots(figsize=(23, 8))
+            ax.bar(niveis_cinza, novo_histograma)
+            ax.set_title('Histograma equalizado da imagem original')
+            ax.set_xlabel('Níveis de cores')
+            ax.set_ylabel('Valor normalizado')
+
+            fig.savefig('img/histograma_equalizado.png')

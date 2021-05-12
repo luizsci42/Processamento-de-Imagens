@@ -7,6 +7,18 @@ class Filtro:
         """
         return matriz_pixels
 
+    def filtragem_linear(self, matriz_pixels: [int], prop_mask: (int, int)):
+        """
+        Dada uma matriz de pixels de tamanho m por n, calculamos os valores a e b, correspondentes à distância
+        do centro da máscara às bordas, sendo: a = (m-1)/2 e b = (n-1)/2. Em seguida, é aplicada a filtragem linear
+        para obtenção da imagem g(x,y).
+
+        :param matriz_pixels:
+        :param prop_mask:
+        :return:
+        """
+        return matriz_pixels
+
 
 class Negativo(Filtro):
     """
@@ -120,3 +132,20 @@ class AlargamentoContraste(Filtro):
         alargada = []
 
         return alargada
+
+
+class Suavizacao(Filtro):
+    def filtragem_linear(self, matriz_pixels: [int], prop_mask: (int, int)):
+        m, n = prop_mask[0], prop_mask[1]
+        mascara = 1 / (m * n)
+        a, b = ((m - 1) / 2), ((n - 1) / 2)
+        imagem_g = []
+
+        for x in range(0, len(matriz_pixels) + 1):
+            for y in range(0, len(matriz_pixels) + 1):
+                for s in range((-1 * b), a + 1):
+                    for t in range((-1 * b), b + 1):
+                        ponto = mascara[s, t] * matriz_pixels[x + s, y + t]
+                        imagem_g.append(ponto)
+
+        return imagem_g
