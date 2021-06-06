@@ -1,3 +1,6 @@
+from Imagem import Imagem
+
+
 class Filtro:
     def aplicar_efeito(self, matriz_pixels: [int]):
         """
@@ -28,6 +31,15 @@ class Filtro:
                 :return:
                 """
         return matriz_pixels
+
+
+class Identidade(Filtro):
+    def aplicar_efeito(self, matriz_pixels: [int]):
+        nova_imagem = []
+        for pixel in matriz_pixels:
+            nova_imagem.append(pixel)
+
+        return '\n'.join(nova_imagem)
 
 
 class Negativo(Filtro):
@@ -139,29 +151,22 @@ class AlargamentoContraste(Filtro):
         :param matriz_pixels:
         :return: Matriz de pixels com o alargamento de contraste aplicado
         """
-        alargada = []
+        img_alargada = []
 
-        return alargada
+        return img_alargada
 
 
-def converter_para_duas_dimensoes(pixels: [int]):
-    dimensao_y = 512
-    contador = 0
-    nova_matriz = []
-
-    for pixel in pixels:
-        vetor_dim_y = []
-        while contador <= dimensao_y:
-            vetor_dim_y.append(pixel)
-            contador += 1
-        nova_matriz.append(vetor_dim_y)
-        contador = 0
+def converter_para_duas_dimensoes(imagem: Imagem):
+    pixels = imagem.pixels
+    dim_y, dim_x = imagem.dimensao.split(' ')
+    print('Convertendo para dimensões {}x{}'.format(dim_y, dim_x))
+    nova_matriz = [pixels[i:i + int(dim_y)] for i in range(0, len(pixels), int(dim_y))]
 
     return nova_matriz
 
 
 class Suavizacao(Filtro):
-    def filtragem_linear(self, matriz_pixels: [int], dim_mascara: (int, int)):
+    def filtro_da_media(self, imagem: Imagem, dim_mascara: (int, int) = (3, 3)):
         """
         Para a filtragem espacial linear, é considerada uma imagem, chamada de máscara, de
         dimensões n por m, que irá percorrer cada pixel da imagem original e calcular
@@ -170,7 +175,7 @@ class Suavizacao(Filtro):
 
         Este método aplica o filtro da média, desconsiderando os pixels da borda.
 
-        :param matriz_pixels: A matriz formada com os pixels da imagem.
+        :param imagem: A imagem que será filtrada.
         :param dim_mascara: As dimensões da máscara utilizada.
         :return: A imagem filtrada.
         """
@@ -182,25 +187,35 @@ class Suavizacao(Filtro):
         # a e b nos dão, respectivamente, a distância do centro pras bordas verticais e horizontais
         a, b = int(((m - 1) / 2)), int(((n - 1) / 2))
         soma_ponderada = 0
-        imagem_g = []
-        cont = 0
+        # objeto que representa a imagem de saída
+        imagem_g = Imagem(
+            tipo=imagem.tipo,
+            dimensao=imagem.dimensao,
+            maximo=imagem.maximo,
+            pixels=imagem.pixels
+        )
 
-        matriz_pixels = converter_para_duas_dimensoes(matriz_pixels)
+        print('Dimensões originais: ', imagem_g.dimensao)
+        matriz_pixels = converter_para_duas_dimensoes(imagem)
+        print('Dimensões: {}x{}'.format(len(matriz_pixels[0]), len(matriz_pixels)))
+        imagem_g.pixels = matriz_pixels
 
         # O for mais externo percorre as linhas da matriz imagem. Ou seja, o eixo x
         for x in range(1, len(matriz_pixels)):
             # Percorre as colunas da matriz imagem. Ou seja, o eixo y
             for y in range(1, len(matriz_pixels)):
-                imagem_g.append(soma_ponderada)
-                soma_ponderada = 0
                 # percorre o eixo x da máscara
                 for s in range((-1 * b), a + 1):
                     # percorre o eixo y da máscara
                     for t in range((-1 * b), b + 1):
-                        print('({}, {}) ({}, {})'.format(x, y, s, t))
                         # calculamos a média ponderada de todos os pixels na máscara e alteramos o ponto central
                         # lembrando que (x, y) indicam os pontos que serão alterados e (s, t) os pontos na máscara
                         ponto = int(matriz_pixels[s][t])
                         soma_ponderada += int((int(peso) * ponto) / 9)
+                        # print('Soma = {} * {}'.format(int(peso), ponto))
+                        # print('Soma ponderada: {} ({}, {}) ({}, {}) / 9'.format(soma_ponderada, x, y, s, t))
+                # print('\nNovo valor: {}\n'.format(soma_ponderada))
+                imagem_g.pixels[x][y] = soma_ponderada
+                soma_ponderada = 0
 
-        return matriz_pixels
+        return imagem_g.pixels

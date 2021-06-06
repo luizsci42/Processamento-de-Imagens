@@ -35,7 +35,7 @@ def realizar_operacoes_na_imagem(imagem: Imagem, efeito: ft.Filtro):
     return nova_imagem
 
 
-def aplicar_todos_efeitos():
+def aplicar_todos_efeitos(img_original: Imagem):
     efeito_negativo = ft.Negativo(valor_maximo=img_original.maximo)
     efeito_limiarizacao = ft.Limiarizacao(valor_maximo=img_original.maximo, limiar=100)
     efeito_fatiamento = ft.Fatiamento(100, 150)
@@ -57,13 +57,30 @@ def aplicar_todos_efeitos():
     # img_fatiada.equalizar()
 
 
-path_entrada = 'img/novo_teste.ppm'
+def main():
+    path_entrada = 'img/imagem_original.pbm'
 
-tipo, dim, maxi, pixels = ler_imagem(path_entrada)
-img_original = Imagem(tipo=str(tipo), dimensao=dim, maximo=maxi, pixels=pixels)
-# img_original.gerar_histograma(normalizar=False, salvar=True)
-# print('Histograma da imagem original:\n{}'.format(img_original.histograma))
-# img_original.mostrar_propriedades()
+    tipo, dim, max, pixels = ler_imagem(path_entrada)
+    img_original = Imagem(tipo=str(tipo), dimensao=dim, maximo=max, pixels=pixels)
 
-# aplicar_todos_efeitos()
-# img_original.equalizar(salvar=True)
+    # objeto que representa a imagem de saída
+    nova_imagem = Imagem(
+        tipo=img_original.tipo,
+        dimensao=img_original.dimensao,
+        maximo=img_original.maximo,
+        pixels=img_original.pixels
+    )
+
+    # objeto que representa o filtro de suavização
+    suavizacao = ft.Suavizacao()
+    # aplicamos o filtro da mediana na imagem original e colocamos a saída na nova imagem
+    nova_imagem.pixels = suavizacao.filtro_da_media(img_original)
+
+    # salvamos a imagem filtrada
+    arquivo = 'img/grupo_8_imagem_1_linhas_32_palavras_302.pbm'
+    nova_imagem.salvar(arquivo)
+    print('Imagem salva como: {}'.format(arquivo))
+
+
+if __name__ == '__main__':
+    main()

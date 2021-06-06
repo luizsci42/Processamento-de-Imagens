@@ -43,7 +43,13 @@ class Imagem:
             saida.write(str(self.tipo))
             saida.write(str(self.dimensao))
             saida.write(str(self.maximo))
-            saida.writelines(str(self.pixels))
+            try:
+                for pixel in self.pixels:
+                    for valor in pixel:
+                        saida.write(str(valor) + '\n')
+            except TypeError:
+                for pixel in self.pixels:
+                    saida.write(str(pixel) + '\n')
 
     def mostrar_propriedades(self):
         print('Tipo: {}\nDimensões: {}\nValor máximo: {}'.format(
