@@ -7,16 +7,26 @@ class Filtro:
         """
         return matriz_pixels
 
-    def filtragem_linear(self, matriz_pixels: [int], prop_mask: (int, int)):
+    def filtro_da_media(self, matriz_pixels: [int], prop_mask: (int, int)):
         """
         Dada uma matriz de pixels de tamanho m por n, calculamos os valores a e b, correspondentes à distância
         do centro da máscara às bordas, sendo: a = (m-1)/2 e b = (n-1)/2. Em seguida, é aplicada a filtragem linear
         para obtenção da imagem g(x,y).
-
         :param matriz_pixels:
         :param prop_mask:
         :return:
         """
+        return matriz_pixels
+
+    def filtro_da_mediana(self, matriz_pixels: [int], prop_mask: (int, int) = (3, 3)):
+        """
+                Dada uma matriz de pixels de tamanho m por n, calculamos os valores a e b, correspondentes à distância
+                do centro da máscara às bordas, sendo: a = (m-1)/2 e b = (n-1)/2. Em seguida, é aplicada a filtragem linear
+                para obtenção da imagem g(x,y).
+                :param matriz_pixels:
+                :param prop_mask:
+                :return:
+                """
         return matriz_pixels
 
 
@@ -134,18 +144,63 @@ class AlargamentoContraste(Filtro):
         return alargada
 
 
+def converter_para_duas_dimensoes(pixels: [int]):
+    dimensao_y = 512
+    contador = 0
+    nova_matriz = []
+
+    for pixel in pixels:
+        vetor_dim_y = []
+        while contador <= dimensao_y:
+            vetor_dim_y.append(pixel)
+            contador += 1
+        nova_matriz.append(vetor_dim_y)
+        contador = 0
+
+    return nova_matriz
+
+
 class Suavizacao(Filtro):
-    def filtragem_linear(self, matriz_pixels: [int], prop_mask: (int, int)):
-        m, n = prop_mask[0], prop_mask[1]
-        mascara = 1 / (m * n)
-        a, b = ((m - 1) / 2), ((n - 1) / 2)
+    def filtragem_linear(self, matriz_pixels: [int], dim_mascara: (int, int)):
+        """
+        Para a filtragem espacial linear, é considerada uma imagem, chamada de máscara, de
+        dimensões n por m, que irá percorrer cada pixel da imagem original e calcular
+        a média ponderada dos pixels ao redor. O novo valor do píxel será então essa
+        média. Esse filtro acaba por borrar a imagem.
+
+        Este método aplica o filtro da média, desconsiderando os pixels da borda.
+
+        :param matriz_pixels: A matriz formada com os pixels da imagem.
+        :param dim_mascara: As dimensões da máscara utilizada.
+        :return: A imagem filtrada.
+        """
+        # m e n são as dimensões da máscara
+        m, n = dim_mascara[0], dim_mascara[1]
+        # daremos pesos iguais para cada valor do pixel
+        # peso = 1 / (m * n)
+        peso = 1
+        # a e b nos dão, respectivamente, a distância do centro pras bordas verticais e horizontais
+        a, b = int(((m - 1) / 2)), int(((n - 1) / 2))
+        soma_ponderada = 0
         imagem_g = []
+        cont = 0
 
-        for x in range(0, len(matriz_pixels) + 1):
-            for y in range(0, len(matriz_pixels) + 1):
+        matriz_pixels = converter_para_duas_dimensoes(matriz_pixels)
+
+        # O for mais externo percorre as linhas da matriz imagem. Ou seja, o eixo x
+        for x in range(1, len(matriz_pixels)):
+            # Percorre as colunas da matriz imagem. Ou seja, o eixo y
+            for y in range(1, len(matriz_pixels)):
+                imagem_g.append(soma_ponderada)
+                soma_ponderada = 0
+                # percorre o eixo x da máscara
                 for s in range((-1 * b), a + 1):
+                    # percorre o eixo y da máscara
                     for t in range((-1 * b), b + 1):
-                        ponto = mascara[s, t] * matriz_pixels[x + s, y + t]
-                        imagem_g.append(ponto)
+                        print('({}, {}) ({}, {})'.format(x, y, s, t))
+                        # calculamos a média ponderada de todos os pixels na máscara e alteramos o ponto central
+                        # lembrando que (x, y) indicam os pontos que serão alterados e (s, t) os pontos na máscara
+                        ponto = int(matriz_pixels[s][t])
+                        soma_ponderada += int((int(peso) * ponto) / 9)
 
-        return imagem_g
+        return matriz_pixels
