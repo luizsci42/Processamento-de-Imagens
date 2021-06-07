@@ -161,7 +161,7 @@ def converter_para_duas_dimensoes(imagem: Imagem):
     dim_y, dim_x = imagem.dimensao.split(' ')
     print('Convertendo para dimensões {}x{}'.format(dim_y, dim_x))
 
-    if imagem.tipo == 'P1':
+    if imagem.tipo[1] == '1':
         import numpy as np
 
         nova_matriz = []
@@ -210,13 +210,11 @@ class Suavizacao(Filtro):
             pixels=imagem.pixels
         )
 
-        print('Dimensões originais: ', imagem_g.dimensao)
         matriz_pixels = converter_para_duas_dimensoes(imagem)
-        print('Dimensões: {}x{}'.format(len(matriz_pixels[0]), len(matriz_pixels)))
         imagem_g.pixels = matriz_pixels
 
         # O for mais externo percorre as linhas da matriz imagem. Ou seja, o eixo x
-        for x in range(1, len(matriz_pixels)):
+        for x in range(1, len(matriz_pixels) - 1):
             # Percorre as colunas da matriz imagem. Ou seja, o eixo y
             for y in range(1, len(matriz_pixels)):
                 # percorre o eixo x da máscara
@@ -225,7 +223,8 @@ class Suavizacao(Filtro):
                     for t in range((-1 * b), b + 1):
                         # calculamos a média ponderada de todos os pixels na máscara e alteramos o ponto central
                         # lembrando que (x, y) indicam os pontos que serão alterados e (s, t) os pontos na máscara
-                        ponto = int(matriz_pixels[s][t])
+                        lin, col = x - s, y - t
+                        ponto = int(matriz_pixels[lin][col])
                         soma_ponderada += int((int(peso) * ponto) / 9)
                         # print('Soma = {} * {}'.format(int(peso), ponto))
                         # print('Soma ponderada: {} ({}, {}) ({}, {}) / 9'.format(soma_ponderada, x, y, s, t))
@@ -248,25 +247,29 @@ class Suavizacao(Filtro):
             pixels=imagem.pixels
         )
 
-        print('Dimensões originais: ', imagem_g.dimensao)
         matriz_pixels = converter_para_duas_dimensoes(imagem)
-        print('Dimensões: {}x{}'.format(len(matriz_pixels[0]), len(matriz_pixels)))
         imagem_g.pixels = matriz_pixels
+        # print('A matriz a ser filtrada: {}\n'.format(matriz_pixels))
 
         # O for mais externo percorre as linhas da matriz imagem. Ou seja, o eixo x
-        for x in range(1, len(matriz_pixels)):
+        for x in range(1, len(matriz_pixels) - 1):
             # Percorre as colunas da matriz imagem. Ou seja, o eixo y
             for y in range(1, len(matriz_pixels)):
                 valores_vizinhanca = []
+                # print('\nPonto {} na posição: ({}, {}) sendo analisado'.format(matriz_pixels[x][y], x, y))
                 # percorre o eixo x da máscara
                 for s in range((-1 * b), a + 1):
                     # percorre o eixo y da máscara
                     for t in range((-1 * b), b + 1):
-                        ponto = int(matriz_pixels[s][t])
+                        lin, col = x - s, y - t
+                        ponto = int(matriz_pixels[lin][col])
+                        # print('Vizinho {} na posição ({}, {})'.format(ponto, lin, col))
                         valores_vizinhanca.append(ponto)
                 valores_vizinhanca.sort()
+                # print('Valores na vizinhança: ', valores_vizinhanca)
                 posicao_meio = round(len(valores_vizinhanca) / 2)
                 mediana = valores_vizinhanca[posicao_meio]
+                # print('A mediana é: ', mediana)
                 # print('\nNovo valor: {}\n'.format(soma_ponderada))
                 imagem_g.pixels[x][y] = mediana
 
