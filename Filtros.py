@@ -10,27 +10,27 @@ class Filtro:
         """
         return matriz_pixels
 
-    def filtro_da_media(self, matriz_pixels: [int], prop_mask: (int, int)):
+    def filtro_da_media(self, imagem: Imagem, dim_mascara: (int, int) = (3, 3)):
         """
         Dada uma matriz de pixels de tamanho m por n, calculamos os valores a e b, correspondentes à distância
         do centro da máscara às bordas, sendo: a = (m-1)/2 e b = (n-1)/2. Em seguida, é aplicada a filtragem linear
         para obtenção da imagem g(x,y).
-        :param matriz_pixels:
-        :param prop_mask:
+        :param imagem:
+        :param dim_mascara:
         :return:
         """
-        return matriz_pixels
+        return imagem.pixels
 
-    def filtro_da_mediana(self, matriz_pixels: [int], prop_mask: (int, int) = (3, 3)):
+    def filtro_da_mediana(self, imagem: Imagem, dim_mascara: (int, int) = (3, 3)):
         """
                 Dada uma matriz de pixels de tamanho m por n, calculamos os valores a e b, correspondentes à distância
                 do centro da máscara às bordas, sendo: a = (m-1)/2 e b = (n-1)/2. Em seguida, é aplicada a filtragem linear
                 para obtenção da imagem g(x,y).
-                :param matriz_pixels:
-                :param prop_mask:
+                :param imagem:
+                :param dim_mascara:
                 :return:
                 """
-        return matriz_pixels
+        return imagem.pixels
 
 
 class Identidade(Filtro):
@@ -160,9 +160,24 @@ def converter_para_duas_dimensoes(imagem: Imagem):
     pixels = imagem.pixels
     dim_y, dim_x = imagem.dimensao.split(' ')
     print('Convertendo para dimensões {}x{}'.format(dim_y, dim_x))
-    nova_matriz = [pixels[i:i + int(dim_y)] for i in range(0, len(pixels), int(dim_y))]
 
-    return nova_matriz
+    if imagem.tipo == 'P1':
+        import numpy as np
+
+        nova_matriz = []
+        for pixel in pixels:
+            for valor in pixel:
+                try:
+                    valor = int(valor)
+                    nova_matriz.append(valor)
+                except ValueError:
+                    pass
+
+        for i in range(0, 70):
+            nova_matriz.append(1)
+        return np.reshape(nova_matriz, (int(dim_y), int(dim_x)))
+    else:
+        return [pixels[i:i + int(dim_y)] for i in range(0, len(pixels), int(dim_y))]
 
 
 class Suavizacao(Filtro):
@@ -217,5 +232,42 @@ class Suavizacao(Filtro):
                 # print('\nNovo valor: {}\n'.format(soma_ponderada))
                 imagem_g.pixels[x][y] = soma_ponderada
                 soma_ponderada = 0
+
+        return imagem_g.pixels
+
+    def filtro_da_mediana(self, imagem: Imagem, dim_mascara: (int, int) = (3, 3)):
+        # m e n são as dimensões da máscara
+        m, n = dim_mascara[0], dim_mascara[1]
+        # a e b nos dão, respectivamente, a distância do centro pras bordas verticais e horizontais
+        a, b = int(((m - 1) / 2)), int(((n - 1) / 2))
+        # objeto que representa a imagem de saída
+        imagem_g = Imagem(
+            tipo=imagem.tipo,
+            dimensao=imagem.dimensao,
+            maximo=imagem.maximo,
+            pixels=imagem.pixels
+        )
+
+        print('Dimensões originais: ', imagem_g.dimensao)
+        matriz_pixels = converter_para_duas_dimensoes(imagem)
+        print('Dimensões: {}x{}'.format(len(matriz_pixels[0]), len(matriz_pixels)))
+        imagem_g.pixels = matriz_pixels
+
+        # O for mais externo percorre as linhas da matriz imagem. Ou seja, o eixo x
+        for x in range(1, len(matriz_pixels)):
+            # Percorre as colunas da matriz imagem. Ou seja, o eixo y
+            for y in range(1, len(matriz_pixels)):
+                valores_vizinhanca = []
+                # percorre o eixo x da máscara
+                for s in range((-1 * b), a + 1):
+                    # percorre o eixo y da máscara
+                    for t in range((-1 * b), b + 1):
+                        ponto = int(matriz_pixels[s][t])
+                        valores_vizinhanca.append(ponto)
+                valores_vizinhanca.sort()
+                posicao_meio = round(len(valores_vizinhanca) / 2)
+                mediana = valores_vizinhanca[posicao_meio]
+                # print('\nNovo valor: {}\n'.format(soma_ponderada))
+                imagem_g.pixels[x][y] = mediana
 
         return imagem_g.pixels

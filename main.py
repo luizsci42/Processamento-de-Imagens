@@ -58,7 +58,7 @@ def aplicar_todos_efeitos(img_original: Imagem):
 
 
 def main():
-    path_entrada = 'img/imagem_original.pbm'
+    path_entrada = 'img/teste.ppm'
 
     tipo, dim, max, pixels = ler_imagem(path_entrada)
     img_original = Imagem(tipo=str(tipo), dimensao=dim, maximo=max, pixels=pixels)
@@ -74,10 +74,10 @@ def main():
     # objeto que representa o filtro de suavização
     suavizacao = ft.Suavizacao()
     # aplicamos o filtro da mediana na imagem original e colocamos a saída na nova imagem
-    nova_imagem.pixels = suavizacao.filtro_da_media(img_original)
+    nova_imagem.pixels = suavizacao.filtro_da_mediana(img_original)
 
     # salvamos a imagem filtrada
-    arquivo = 'img/grupo_8_imagem_1_linhas_32_palavras_302.pbm'
+    arquivo = 'img/saida_teste.pgm'
     nova_imagem.salvar(arquivo)
     print('Imagem salva como: {}'.format(arquivo))
 
