@@ -93,14 +93,16 @@ class Limiarizacao(Filtro):
         self.valor_maximo = valor_maximo
         self.limiar = limiar
 
-    def aplicar_efeito(self, matriz_pixels: [int]):
+    def aplicar_efeito(self, imagem: Imagem):
         """
         Aplica o efeito de limiarização.
 
-        :param matriz_pixels:
+        :param imagem:
         :return:
         """
+        matriz_pixels = imagem.pixels
         limiarizada = []
+
         for pixel in matriz_pixels:
             try:
                 canal = int(pixel)
@@ -112,7 +114,8 @@ class Limiarizacao(Filtro):
             except ValueError:
                 pass
 
-        return limiarizada
+        imagem.pixels = limiarizada
+        return imagem
 
 
 class Fatiamento(Filtro):
@@ -126,14 +129,15 @@ class Fatiamento(Filtro):
             self.limite_inf = limite_sup
             self.limite_sup = limite_inf
 
-    def aplicar_efeito(self, matriz_pixels: [int]):
+    def aplicar_efeito(self, imagem: Imagem):
         """
         Recebe o limite inferior e superior, correspondente a uma faixa de cores.
         As cores nesta faixa serão alteradas para valores maiores, enquanto que
         os valores fora dessa faixa serão mantidos.
-        :param matriz_pixels:
+        :param imagem:
         :return:
         """
+        matriz_pixels = imagem.pixels
         contrastante = []
 
         for pixel in matriz_pixels:
@@ -145,14 +149,15 @@ class Fatiamento(Filtro):
 
             contrastante.append(canal)
 
-        return contrastante
+        imagem.pixels = contrastante
+        return imagem
 
 
 class AlargamentoContraste(Filtro):
     def __init__(self):
         pass
 
-    def aplicar_efeito(self, matriz_pixels: [int]):
+    def aplicar_efeito(self, imagem: Imagem):
         """
         O alargamento de contraste recebe dois limites e uma inclinação e mapeia
         os pixels de uma imagem de forma que os valores abaixo do limite inferior
@@ -162,7 +167,7 @@ class AlargamentoContraste(Filtro):
         de valor acima do limite superior também serão achatados (inclinação da
         reta igual à do limite inferior e menor que da faixa entre os dois limites.
 
-        :param matriz_pixels:
+        :param imagem:
         :return: Matriz de pixels com o alargamento de contraste aplicado
         """
         img_alargada = []
