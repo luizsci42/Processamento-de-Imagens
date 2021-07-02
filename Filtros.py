@@ -242,8 +242,6 @@ class Suavizacao(Filtro):
         else:
             matriz_pixels = imagem_g.pixels
 
-        print('A matriz a ser filtrada: {}\n'.format(matriz_pixels))
-
         # O for mais externo percorre as linhas da matriz imagem. Ou seja, o eixo x
         for x in range(1, len(matriz_pixels) - 1):
             # Percorre as colunas da matriz imagem. Ou seja, o eixo y

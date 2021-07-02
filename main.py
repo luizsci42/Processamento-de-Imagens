@@ -72,15 +72,22 @@ def main():
     tipo, dim, maxi, pixels = ler_imagem(path_entrada)
     img_original = Imagem(tipo=str(tipo), dimensao=dim, maximo=maxi, pixels=pixels)
 
+    nova_imagem = Imagem(
+        tipo=img_original.tipo,
+        dimensao=img_original.dimensao,
+        maximo=img_original.maximo,
+        pixels=img_original.pixels
+    )
+
     # objeto que representa os filtros de morfologia matemática
     morfologia = ft.Morfologia()
 
     # aplicamos o filtro de erosão
-    nova_imagem = morfologia.fechamento(img_original)
+    imagem_g = morfologia.fechamento(img_original)
 
     # salvamos a imagem filtrada
-    arquivo = 'img/saida_disquete_fechamento.pgm'
-    nova_imagem.salvar(arquivo)
+    arquivo = 'img/saida_disquete_fechamento.pbm'
+    imagem_g.salvar(arquivo)
     print('Imagem salva como: {}'.format(arquivo))
 
 
