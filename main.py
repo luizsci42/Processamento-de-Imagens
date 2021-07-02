@@ -11,7 +11,7 @@ def ler_imagem(caminho: str):
     linhas = []
 
     for linha in img:
-        if not linha.startswith('#'):
+        if not linha.startswith('#') and linha != '\n':
             linhas.append(linha)
 
     # TODO: fazer com que na leitura, seja criado  objeto tupla, que especifica o número de canais de um pixel.
@@ -19,9 +19,19 @@ def ler_imagem(caminho: str):
     # tipo_img = TuplaCores(linhas[0])
     tipo_img = linhas[0]
     dim_matriz = linhas[1]
-    valor_max = int(linhas[2])
+    pixels = []
 
-    return tipo_img, dim_matriz, valor_max, linhas[3:]
+    if tipo_img.__contains__('P1'):
+        valor_max = '1'
+        for linha in linhas[2:]:
+            linha = linha.replace(' ', '')
+            linha = linha.replace('\n', '')
+            pixels.append([int(pixel) for pixel in linha])
+    else:
+        valor_max = int(linhas[2])
+        pixels = [int(valor) for valor in linhas[3:]]
+
+    return tipo_img, dim_matriz, valor_max, pixels
 
 
 def realizar_operacoes_na_imagem(imagem: Imagem, efeito: ft.Filtro):
@@ -58,9 +68,9 @@ def aplicar_todos_efeitos(img_original: Imagem):
 
 
 def main():
-    path_entrada = 'img/imagem_original.pbm'
-    tipo, dim, max, pixels = ler_imagem(path_entrada)
-    img_original = Imagem(tipo=str(tipo), dimensao=dim, maximo=max, pixels=pixels)
+    path_entrada = 'img/disquete.pbm'
+    tipo, dim, maxi, pixels = ler_imagem(path_entrada)
+    img_original = Imagem(tipo=str(tipo), dimensao=dim, maximo=maxi, pixels=pixels)
 
     # objeto que representa a imagem de saída
     nova_imagem = Imagem(
@@ -73,10 +83,10 @@ def main():
     # objeto que representa o filtro de suavização
     suavizacao = ft.Suavizacao()
     # aplicamos o filtro da mediana na imagem original e colocamos a saída na nova imagem
-    nova_imagem.pixels = suavizacao.filtro_da_mediana(img_original)
+    nova_imagem.pixels = suavizacao.filtro_da_media(img_original)
 
     # salvamos a imagem filtrada
-    arquivo = 'img/grupo_8_imagem_1_linhas_32_palavras_302.pbm'
+    arquivo = 'img/saida_disquete_media.pbm'
     nova_imagem.salvar(arquivo)
     print('Imagem salva como: {}'.format(arquivo))
 
