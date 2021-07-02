@@ -26,7 +26,8 @@ def ler_imagem(caminho: str):
         for linha in linhas[2:]:
             linha = linha.replace(' ', '')
             linha = linha.replace('\n', '')
-            pixels.append([int(pixel) for pixel in linha])
+            for pixel in linha:
+                pixels.append(pixel)
     else:
         valor_max = int(linhas[2])
         pixels = [int(valor) for valor in linhas[3:]]
@@ -68,13 +69,20 @@ def aplicar_todos_efeitos(img_original: Imagem):
 
 
 def main():
-    path_entrada = 'img/ankh.pbm'
+    path_entrada = 'img/imagem_original.pbm'
     tipo, dim, maxi, pixels = ler_imagem(path_entrada)
     img_original = Imagem(tipo=str(tipo), dimensao=dim, maximo=maxi, pixels=pixels)
+    morfologia = ft.Morfologia()
+    suavizacao = ft.Suavizacao()
 
-    efeito_negativo = ft.Negativo()
-    imagem_negativa = efeito_negativo.aplicar_efeito(img_original)
-    imagem_negativa.salvar('img/ankh_negativo.pbm')
+    img_suavizada = suavizacao.filtro_da_mediana(img_original)
+
+    # img_aberta = morfologia.abertura(img_original)
+    # img_fechada = morfologia.fechamento(img_original)
+
+    nome_saida = 'img/grupo_8_imagem_42_linhas_469_palavras.pbm'
+    img_suavizada.salvar(nome_saida)
+    print('Imagem salva como: ', nome_saida)
 
 
 if __name__ == '__main__':

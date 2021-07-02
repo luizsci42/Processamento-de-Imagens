@@ -42,7 +42,8 @@ class Imagem:
         with open(nome, mode='w') as saida:
             saida.write(str(self.tipo))
             saida.write(str(self.dimensao))
-            saida.write(str(self.maximo))
+            if not str(self.tipo).__contains__('1'):
+                saida.write(str(self.maximo))
             saida.write('\n')
             for pixel in self.pixels:
                 for valor in pixel:

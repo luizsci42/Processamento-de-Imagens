@@ -182,7 +182,7 @@ def converter_para_duas_dimensoes(imagem: Imagem):
     dim_y, dim_x = imagem.dimensao.split(' ')
     print('Convertendo para dimensões {}x{}'.format(dim_y, dim_x))
     # outro método pode ser: [pixels[i:i + int(dim_y)] for i in range(0, len(pixels), int(dim_y))]
-    return np.reshape(pixels, (int(dim_y), int(dim_x)))
+    return np.reshape(pixels, (int(dim_x), int(dim_y)))
 
 
 class Suavizacao(Filtro):
@@ -215,11 +215,8 @@ class Suavizacao(Filtro):
             pixels=imagem.pixels
         )
 
-        # se a imagem for do tipo P1, ela já foi lida com duas dimensões na abertura
-        if not imagem.tipo.__contains__('1'):
-            matriz_pixels = converter_para_duas_dimensoes(imagem)
-        else:
-            matriz_pixels = imagem_g.pixels
+        matriz_pixels = converter_para_duas_dimensoes(imagem)
+        imagem_g.pixels = converter_para_duas_dimensoes(imagem_g)
 
         # O for mais externo percorre as linhas da matriz imagem. Ou seja, o eixo x
         for x in range(1, len(matriz_pixels) - 1):
@@ -240,7 +237,7 @@ class Suavizacao(Filtro):
                 imagem_g.pixels[x][y] = soma_ponderada
                 soma_ponderada = 0
 
-        return imagem_g.pixels
+        return imagem_g
 
     def filtro_da_mediana(self, imagem: Imagem, dim_mascara: (int, int) = (3, 3)):
         # m e n são as dimensões da máscara
@@ -255,35 +252,36 @@ class Suavizacao(Filtro):
             pixels=imagem.pixels
         )
 
-        # se a imagem for do tipo P1, ela já foi lida com duas dimensões na abertura
-        if not imagem.tipo.__contains__('1'):
-            matriz_pixels = converter_para_duas_dimensoes(imagem)
-        else:
-            matriz_pixels = imagem_g.pixels
+        matriz_pixels = converter_para_duas_dimensoes(imagem)
+        imagem_g.pixels = converter_para_duas_dimensoes(imagem_g)
+
+        # colunas x linhas
+        dim_y, dim_x = imagem.dimensao.split(' ')
+        dim_y, dim_x = int(dim_y), int(dim_x)
 
         # O for mais externo percorre as linhas da matriz imagem. Ou seja, o eixo x
-        for x in range(1, len(matriz_pixels) - 1):
+        for x in range(1, dim_x - 1):
             # Percorre as colunas da matriz imagem. Ou seja, o eixo y
-            for y in range(1, len(matriz_pixels) - 1):
+            for y in range(1, dim_y - 1):
                 valores_vizinhanca = []
-                print('\nPonto {} na posição: ({}, {}) sendo analisado'.format(matriz_pixels[x][y], x, y))
+                # print('\nPonto {} na posição: ({}, {}) sendo analisado'.format(matriz_pixels[x][y], x, y))
                 # percorre o eixo x da máscara
                 for s in range((-1 * a), a + 1):
                     # percorre o eixo y da máscara
                     for t in range((-1 * b), b + 1):
-                        lin, col = x + s, y + t
+                        lin, col = x - s, y - t
                         ponto = int(matriz_pixels[lin][col])
-                        print('Vizinho {} na posição ({}, {})'.format(ponto, lin, col))
+                        # print('Vizinho {} na posição ({}, {})'.format(ponto, lin, col))
                         valores_vizinhanca.append(ponto)
                 valores_vizinhanca.sort()
-                print('Valores na vizinhança: ', valores_vizinhanca)
+                # print('Valores na vizinhança: ', valores_vizinhanca)
                 posicao_meio = round(len(valores_vizinhanca) / 2)
                 mediana = valores_vizinhanca[posicao_meio]
-                print('A mediana é: ', mediana)
+                # print('A mediana é: ', mediana)
                 imagem_g.pixels[x][y] = mediana
-                print('O valor do pixel em ({}, {}) agora é: {}'.format(x, y, mediana))
+                print('O valor do pixel em ({}, {}) em G é: {}'.format(x, y, mediana))
 
-        return imagem_g.pixels
+        return imagem_g
 
 
 class Morfologia(Filtro):
@@ -318,12 +316,7 @@ class Morfologia(Filtro):
             pixels=pixels_g
         )
 
-        # se a imagem for do tipo P1, ela já foi lida com duas dimensões na abertura
-        if not imagem.tipo.__contains__('1'):
-            pixels_original = converter_para_duas_dimensoes(imagem)
-        else:
-            pixels_original = imagem.pixels
-
+        pixels_original = converter_para_duas_dimensoes(imagem)
         imagem_g.pixels = converter_para_duas_dimensoes(imagem_g)
 
         # O for mais externo percorre as linhas da matriz imagem. Ou seja, o eixo x
@@ -381,13 +374,7 @@ class Morfologia(Filtro):
             pixels=pixels_g
         )
 
-        # se a imagem for do tipo P1, ela já foi lida com duas dimensões na abertura
-        if not imagem.tipo.__contains__('1'):
-            print('Tipo P1')
-            pixels_original = converter_para_duas_dimensoes(imagem)
-        else:
-            pixels_original = imagem.pixels
-
+        pixels_original = converter_para_duas_dimensoes(imagem)
         imagem_g.pixels = converter_para_duas_dimensoes(imagem_g)
 
         # O for mais externo percorre as linhas da matriz imagem. Ou seja, o eixo x
