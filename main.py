@@ -69,19 +69,35 @@ def aplicar_todos_efeitos(img_original: Imagem):
 
 
 def main():
-    path_entrada = 'img/imagem_original.pbm'
+    path_entrada = 'img/texto_sem_ruido.pbm'
     tipo, dim, maxi, pixels = ler_imagem(path_entrada)
     img_original = Imagem(tipo=str(tipo), dimensao=dim, maximo=maxi, pixels=pixels)
     morfologia = ft.Morfologia()
     suavizacao = ft.Suavizacao()
 
     img_suavizada = suavizacao.filtro_da_mediana(img_original)
-
-    # img_aberta = morfologia.abertura(img_original)
-    # img_fechada = morfologia.fechamento(img_original)
-
-    nome_saida = 'img/grupo_8_imagem_42_linhas_469_palavras.pbm'
+    nome_saida = 'out/texto_suavizado.pbm'
     img_suavizada.salvar(nome_saida)
+    print('Imagem salva como: ', nome_saida)
+
+    img_erodida = morfologia.erosao(img_original)
+    nome_saida = 'out/texto_erodido.pbm'
+    img_erodida.salvar(nome_saida)
+    print('Imagem salva como: ', nome_saida)
+
+    img_dilatado = morfologia.dilatacao(img_original)
+    nome_saida = 'out/texto_dilatado.pbm'
+    img_dilatado.salvar(nome_saida)
+    print('Imagem salva como: ', nome_saida)
+
+    img_aberta = morfologia.abertura(img_original)
+    nome_saida = 'out/texto_aberto.pbm'
+    img_aberta.salvar(nome_saida)
+    print('Imagem salva como: ', nome_saida)
+
+    img_fechada = morfologia.fechamento(img_original)
+    nome_saida = 'out/texto_fechado.pbm'
+    img_fechada.salvar(nome_saida)
     print('Imagem salva como: ', nome_saida)
 
 
