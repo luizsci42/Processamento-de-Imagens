@@ -68,27 +68,13 @@ def aplicar_todos_efeitos(img_original: Imagem):
 
 
 def main():
-    path_entrada = 'img/disquete.pbm'
+    path_entrada = 'img/ankh.pbm'
     tipo, dim, maxi, pixels = ler_imagem(path_entrada)
     img_original = Imagem(tipo=str(tipo), dimensao=dim, maximo=maxi, pixels=pixels)
 
-    nova_imagem = Imagem(
-        tipo=img_original.tipo,
-        dimensao=img_original.dimensao,
-        maximo=img_original.maximo,
-        pixels=img_original.pixels
-    )
-
-    # objeto que representa os filtros de morfologia matemática
-    morfologia = ft.Morfologia()
-
-    # aplicamos o filtro de erosão
-    imagem_g = morfologia.fechamento(img_original)
-
-    # salvamos a imagem filtrada
-    arquivo = 'img/saida_disquete_fechamento.pbm'
-    imagem_g.salvar(arquivo)
-    print('Imagem salva como: {}'.format(arquivo))
+    efeito_negativo = ft.Negativo()
+    imagem_negativa = efeito_negativo.aplicar_efeito(img_original)
+    imagem_negativa.salvar('img/ankh_negativo.pbm')
 
 
 if __name__ == '__main__':

@@ -2,13 +2,13 @@ from Imagem import Imagem
 
 
 class Filtro:
-    def aplicar_efeito(self, matriz_pixels: [int]):
+    def aplicar_efeito(self, imagem: Imagem):
         """
         Define o efeito que será aplicado por cada classe
-        :param matriz_pixels:
+        :param imagem:
         :return:
         """
-        return matriz_pixels
+        return imagem
 
     def filtro_da_media(self, imagem: Imagem, dim_mascara: (int, int) = (3, 3)):
         """
@@ -34,7 +34,8 @@ class Filtro:
 
 
 class Identidade(Filtro):
-    def aplicar_efeito(self, matriz_pixels: [int]):
+    def aplicar_efeito(self, imagem: Imagem):
+        matriz_pixels = imagem.pixels
         nova_imagem = []
         for pixel in matriz_pixels:
             nova_imagem.append(pixel)
@@ -46,29 +47,42 @@ class Negativo(Filtro):
     """
     Esta classe implementa um filtro negativo
     """
-    def __init__(self, valor_maximo: int):
-        self.valor_maximo = int(valor_maximo)
-
-    def aplicar_efeito(self, matriz_pixels: [int]):
+    def aplicar_efeito(self, imagem: Imagem):
         """
         Negativamos a imagem.
         Para cada pixel da imagem, é aplicada a função L - 1 - p
         Em que L é o valor máximo e p é o pixel em questão.
 
-        :param matriz_pixels:
+        :param imagem:
         :return: A matriz de pixels negativados
         """
+        valor_maximo = int(imagem.maximo)
         negativada = []
-        for pixel in matriz_pixels:
-            try:
-                negativo = self.valor_maximo - 1 - int(pixel)
-                if negativo < 0:
-                    negativo = 0
-                negativada.append(negativo)
-            except ValueError:
-                pass
 
-        return negativada
+        if imagem.tipo.__contains__('1'):
+            for linha in imagem.pixels:
+                for pixel in linha:
+                    if pixel == 1:
+                        negativada.append(0)
+                    else:
+                        negativada.append(1)
+            imagem.pixels = negativada
+            negativada = converter_para_duas_dimensoes(imagem)
+        else:
+            matriz_pixels = imagem.pixels
+            for pixel in matriz_pixels:
+                try:
+                    negativo = valor_maximo - 1 - int(pixel)
+                    print(negativo)
+                    if negativo < 0:
+                        negativo = 0
+                    negativada.append(negativo)
+                except ValueError:
+                    pass
+
+        imagem.pixels = negativada
+
+        return imagem
 
 
 class Limiarizacao(Filtro):
