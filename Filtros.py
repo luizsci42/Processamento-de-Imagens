@@ -157,28 +157,13 @@ class AlargamentoContraste(Filtro):
 
 
 def converter_para_duas_dimensoes(imagem: Imagem):
+    import numpy as np
+
     pixels = imagem.pixels
     dim_y, dim_x = imagem.dimensao.split(' ')
     print('Convertendo para dimensões {}x{}'.format(dim_y, dim_x))
-
-    if imagem.tipo.__contains__('1'):
-        import numpy as np
-
-        nova_matriz = []
-        print(len(pixels))
-        for pixel in pixels:
-            for valor in pixel:
-                try:
-                    valor = int(valor)
-                    nova_matriz.append(valor)
-                except ValueError:
-                    pass
-
-        for i in range(0, 70):
-            nova_matriz.append(1)
-        return np.reshape(nova_matriz, (int(dim_y), int(dim_x)))
-    else:
-        return [pixels[i:i + int(dim_y)] for i in range(0, len(pixels), int(dim_y))]
+    # outro método pode ser: [pixels[i:i + int(dim_y)] for i in range(0, len(pixels), int(dim_y))]
+    return np.reshape(pixels, (int(dim_y), int(dim_x)))
 
 
 class Suavizacao(Filtro):
@@ -282,3 +267,148 @@ class Suavizacao(Filtro):
                 print('O valor do pixel em ({}, {}) agora é: {}'.format(x, y, mediana))
 
         return imagem_g.pixels
+
+
+class Morfologia(Filtro):
+    def erosao(self, imagem: Imagem, dim_mascara: (int, int) = (3, 3)):
+        """
+        Recebe uma imagem e uma máscara, aplicando o efeito morfológico de erosão.
+        A erosão consiste em criar uma nova imagem com as mesmas dimensões da imagem
+        original e preencher os pixels com o valor 1 na nova imagem quando os pixels
+        na vizinhança desse possuem todos o valor 1.
+
+        :param imagem: A imagem original que será erodida
+        :param dim_mascara: As dimensões da máscara que ira percorrer a imagem
+        :return: A imagem erodida
+        """
+        # m e n são as dimensões da máscara
+        m, n = dim_mascara[0], dim_mascara[1]
+        # a e b nos dão, respectivamente, a distância do centro pras bordas verticais e horizontais
+        a, b = int(((m - 1) / 2)), int(((n - 1) / 2))
+
+        # inicializamos a imagem de saída com todos os pixels em 0
+        pixels_g = []
+
+        for linha in imagem.pixels:
+            for pixel in linha:
+                pixels_g.append(0)
+
+        # objeto que representa a imagem de saída
+        imagem_g = Imagem(
+            tipo=imagem.tipo,
+            dimensao=imagem.dimensao,
+            maximo=imagem.maximo,
+            pixels=pixels_g
+        )
+
+        # se a imagem for do tipo P1, ela já foi lida com duas dimensões na abertura
+        if not imagem.tipo.__contains__('1'):
+            pixels_original = converter_para_duas_dimensoes(imagem)
+        else:
+            pixels_original = imagem.pixels
+
+        imagem_g.pixels = converter_para_duas_dimensoes(imagem_g)
+
+        # O for mais externo percorre as linhas da matriz imagem. Ou seja, o eixo x
+        for x in range(1, len(pixels_original) - 1):
+            # Percorre as colunas da matriz imagem. Ou seja, o eixo y
+            for y in range(1, len(pixels_original) - 1):
+                valores_vizinhanca = []
+                # print('\nPonto {} na posição: ({}, {}) sendo analisado'.format(pixels_original[x][y], x, y))
+                # percorre o eixo x da máscara
+                for s in range((-1 * b), a + 1):
+                    # percorre o eixo y da máscara
+                    for t in range((-1 * b), b + 1):
+                        # coordenadas do centro da máscara
+                        lin, col = x - s, y - t
+                        # este é o pixel que está no centro da máscara
+                        ponto = int(pixels_original[lin][col])
+                        # print('Vizinho {} na posição ({}, {})'.format(ponto, lin, col))
+                        valores_vizinhanca.append(ponto)
+                # verificamos se a máscara encaixa totalmente nos valores. Ou seja,
+                # se todos os valores da vizinhança são 1
+                valores = str(valores_vizinhanca)
+                # print('Valores na vizinhança: ', valores)
+                if not valores.__contains__('0'):
+                    # quando todos os valores na máscara são 1,
+                    # colocamos o valor 1 na nova imagem, na posição correspondente
+                    print('Inserindo valor 1 na posição ({}, {})'.format(x, y))
+                    imagem_g.pixels[x][y] = 1
+
+        return imagem_g
+
+    def dilatacao(self, imagem: Imagem, dim_mascara: (int, int) = (3, 3)):
+        """
+
+        :param imagem: A imagem original que será dilatada
+        :param dim_mascara: As dimensões da máscara que ira percorrer a imagem
+        :return: A imagem dilatada
+        """
+        # m e n são as dimensões da máscara
+        m, n = dim_mascara[0], dim_mascara[1]
+        # a e b nos dão, respectivamente, a distância do centro pras bordas verticais e horizontais
+        a, b = int(((m - 1) / 2)), int(((n - 1) / 2))
+
+        # inicializamos a imagem de saída com todos os pixels em 0
+        pixels_g = []
+
+        for linha in imagem.pixels:
+            for pixel in linha:
+                pixels_g.append(0)
+
+        # objeto que representa a imagem de saída
+        imagem_g = Imagem(
+            tipo=imagem.tipo,
+            dimensao=imagem.dimensao,
+            maximo=imagem.maximo,
+            pixels=pixels_g
+        )
+
+        # se a imagem for do tipo P1, ela já foi lida com duas dimensões na abertura
+        if not imagem.tipo.__contains__('1'):
+            print('Tipo P1')
+            pixels_original = converter_para_duas_dimensoes(imagem)
+        else:
+            pixels_original = imagem.pixels
+
+        imagem_g.pixels = converter_para_duas_dimensoes(imagem_g)
+
+        # O for mais externo percorre as linhas da matriz imagem. Ou seja, o eixo x
+        for x in range(1, len(pixels_original) - 1):
+            # Percorre as colunas da matriz imagem. Ou seja, o eixo y
+            for y in range(1, len(pixels_original) - 1):
+                valores_vizinhanca = []
+                # print('\nPonto {} na posição: ({}, {}) sendo analisado'.format(pixels_original[x][y], x, y))
+                # percorre o eixo x da máscara
+                for s in range((-1 * b), a + 1):
+                    # percorre o eixo y da máscara
+                    for t in range((-1 * b), b + 1):
+                        # coordenadas do centro da máscara
+                        lin, col = x - s, y - t
+                        # este é o pixel que está no centro da máscara
+                        ponto = int(pixels_original[lin][col])
+                        # print('Vizinho {} na posição ({}, {})'.format(ponto, lin, col))
+                        valores_vizinhanca.append(ponto)
+                # verificamos se a máscara encaixa totalmente nos valores. Ou seja,
+                # se todos os valores da vizinhança são 1
+                valores = str(valores_vizinhanca)
+                # print('Valores na vizinhança: ', valores)
+                if valores.__contains__('1'):
+                    print('Inserindo valor 1 na posição ({}, {})'.format(x, y))
+                    imagem_g.pixels[x][y] = 1
+
+        return imagem_g
+
+    def abertura(self, imagem: Imagem):
+        morfologia = Morfologia()
+        imagem = morfologia.erosao(imagem)
+        imagem = morfologia.dilatacao(imagem)
+
+        return imagem
+
+    def fechamento(self, imagem: Imagem):
+        morfologia = Morfologia()
+        imagem = morfologia.dilatacao(imagem)
+        imagem = morfologia.erosao(imagem)
+
+        return imagem

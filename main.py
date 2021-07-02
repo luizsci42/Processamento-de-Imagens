@@ -72,21 +72,14 @@ def main():
     tipo, dim, maxi, pixels = ler_imagem(path_entrada)
     img_original = Imagem(tipo=str(tipo), dimensao=dim, maximo=maxi, pixels=pixels)
 
-    # objeto que representa a imagem de saída
-    nova_imagem = Imagem(
-        tipo=img_original.tipo,
-        dimensao=img_original.dimensao,
-        maximo=img_original.maximo,
-        pixels=img_original.pixels
-    )
+    # objeto que representa os filtros de morfologia matemática
+    morfologia = ft.Morfologia()
 
-    # objeto que representa o filtro de suavização
-    suavizacao = ft.Suavizacao()
-    # aplicamos o filtro da mediana na imagem original e colocamos a saída na nova imagem
-    nova_imagem.pixels = suavizacao.filtro_da_media(img_original)
+    # aplicamos o filtro de erosão
+    nova_imagem = morfologia.fechamento(img_original)
 
     # salvamos a imagem filtrada
-    arquivo = 'img/saida_disquete_media.pbm'
+    arquivo = 'img/saida_disquete_fechamento.pgm'
     nova_imagem.salvar(arquivo)
     print('Imagem salva como: {}'.format(arquivo))
 
