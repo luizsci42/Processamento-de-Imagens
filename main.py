@@ -1,5 +1,5 @@
-from Imagem import Imagem, TuplaCores
-import Filtros as ft
+from processamento.Imagem import Imagem
+from processamento import Filtros as ft
 
 """
 Vamos ler algumas imagens, aplicar efeitos e salvá-las em arquivo
@@ -47,7 +47,7 @@ def realizar_operacoes_na_imagem(imagem: Imagem, efeito: ft.Filtro):
 
 
 def aplicar_todos_efeitos(img_original: Imagem):
-    efeito_negativo = ft.Negativo(valor_maximo=img_original.maximo)
+    efeito_negativo = ft.Negativo()
     efeito_limiarizacao = ft.Limiarizacao(valor_maximo=img_original.maximo, limiar=100)
     efeito_fatiamento = ft.Fatiamento(100, 150)
 
@@ -69,34 +69,34 @@ def aplicar_todos_efeitos(img_original: Imagem):
 
 
 def main():
-    path_entrada = 'img/texto_sem_ruido.pbm'
+    path_entrada = 'img/ankh_negativo.pbm'
     tipo, dim, maxi, pixels = ler_imagem(path_entrada)
     img_original = Imagem(tipo=str(tipo), dimensao=dim, maximo=maxi, pixels=pixels)
     morfologia = ft.Morfologia()
     suavizacao = ft.Suavizacao()
 
     img_suavizada = suavizacao.filtro_da_mediana(img_original)
-    nome_saida = 'out/texto_suavizado.pbm'
+    nome_saida = 'out/ankh_negativo_suavizado.pbm'
     img_suavizada.salvar(nome_saida)
     print('Imagem salva como: ', nome_saida)
 
     img_erodida = morfologia.erosao(img_original)
-    nome_saida = 'out/texto_erodido.pbm'
+    nome_saida = 'out/ankh_negativo_erodido.pbm'
     img_erodida.salvar(nome_saida)
     print('Imagem salva como: ', nome_saida)
 
     img_dilatado = morfologia.dilatacao(img_original)
-    nome_saida = 'out/texto_dilatado.pbm'
+    nome_saida = 'out/ankh_negativo_dilatado.pbm'
     img_dilatado.salvar(nome_saida)
     print('Imagem salva como: ', nome_saida)
 
     img_aberta = morfologia.abertura(img_original)
-    nome_saida = 'out/texto_aberto.pbm'
+    nome_saida = 'out/ankh_negativo_aberto.pbm'
     img_aberta.salvar(nome_saida)
     print('Imagem salva como: ', nome_saida)
 
     img_fechada = morfologia.fechamento(img_original)
-    nome_saida = 'out/texto_fechado.pbm'
+    nome_saida = 'out/ankh_negativo_fechado.pbm'
     img_fechada.salvar(nome_saida)
     print('Imagem salva como: ', nome_saida)
 
